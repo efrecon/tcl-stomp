@@ -1,3 +1,5 @@
+#! /usr/bin/env tclsh
+
 set prg_args {
     -h        ""          "Print this help and exit"
     -v        0           "Verbosity level \[0-5\]"
@@ -8,21 +10,24 @@ set prg_args {
 
 
 set dirname [file dirname [file normalize [info script]]]
+set appname [file rootname [file tail [info script]]]
 lappend auto_path [file join $dirname lib stomp]
 
 package require stomp::server
 
 # Dump help based on the command-line option specification and exit.
 proc ::help:dump { { hdr "" } } {
+    global appname
+
     if { $hdr ne "" } {
 	puts $hdr
 	puts ""
     }
     puts "NAME:"
-    puts "\tserver - A simple no-fuss STOMP server"
+    puts "\t$appname - A simple no-fuss STOMP server"
     puts ""
     puts "USAGE"
-    puts "\tserver \[options\]"
+    puts "\t${appname}.tcl \[options\]"
     puts ""
     puts "OPTIONS:"
     foreach { arg val dsc } $::prg_args {
