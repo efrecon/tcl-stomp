@@ -64,8 +64,12 @@ foreach {arg val dsc} $prg_args {
 if { [::getopt argv -h] } {
     ::help:dump
 }
-foreach opt [array names FWD -*] {
-    ::getopt argv $opt FWD($opt) $FWD($opt)
+
+for {set eaten ""} {$eaten ne $argv} {} {
+    set eaten $argv
+    foreach opt [array names FWD -*] {
+	::getopt argv $opt FWD($opt) $FWD($opt)
+    }
 }
 
 # Arguments remaining?? dump help and exit

@@ -61,8 +61,11 @@ foreach {arg val dsc} $prg_args {
 if { [::getopt argv -h] } {
     ::help:dump
 }
-foreach opt [array names SRV -*] {
-    ::getopt argv $opt SRV($opt) $SRV($opt)
+for {set eaten ""} { $eaten ne $argv } {} {
+    set eaten $argv
+    foreach opt [array names SRV -*] {
+	::getopt argv $opt SRV($opt) $SRV($opt)
+    }
 }
 
 # Arguments remaining?? dump help and exit
