@@ -9,7 +9,7 @@ namespace eval ::stomp {
 	    idGene         0
 	    idClamp        10000
 	    idFormat       7
-	    verbose        5
+	    verbose        0
 	    dbgfd          stderr
 	    dateLogHeader  "\[%Y%m%d %H%M%S\] "
 	}

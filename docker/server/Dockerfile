@@ -13,4 +13,4 @@ RUN svn checkout https://github.com/efrecon/tcl-stomp/trunk /opt/stomp
 
 EXPOSE 61613
 
-ENTRYPOINT ["tclsh8.6", "/opt/stomp/stompserver.tcl"]
+ENTRYPOINT ["tclsh8.6", "/opt/stomp/stompserver.tcl", "-v", "4"]
