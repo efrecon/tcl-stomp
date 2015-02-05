@@ -78,5 +78,5 @@ if { [llength $argv] > 0 } {
 set SRV(server) [::stomp::server::new \
 		     -port $SRV(-port) \
 		     -users $SRV(-users) \
-		     -vhosts $SRC(-vhosts)]
+		     -vhosts $SRV(-vhosts)]
 vwait forever
