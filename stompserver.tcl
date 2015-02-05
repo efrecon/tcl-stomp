@@ -5,6 +5,7 @@ set prg_args {
     -v        0           "Verbosity level \[0-5\]"
     -port     61613       "Port to listen on"
     -users    {}          "List of authorised user and passwords, colon separated"
+    -vhosts   {}          "List of virtual hosts"
 }
 
 
@@ -74,5 +75,8 @@ if { [llength $argv] > 0 } {
 }
 
 ::stomp::verbosity $SRV(-v)
-set SRV(server) [::stomp::server::new -port $SRV(-port) -users $SRV(-users)]
+set SRV(server) [::stomp::server::new \
+		     -port $SRV(-port) \
+		     -users $SRV(-users) \
+		     -vhosts $SRC(-vhosts)]
 vwait forever
