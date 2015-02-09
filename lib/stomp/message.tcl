@@ -230,7 +230,7 @@ proc ::stomp::message::HandleInput { reader } {
 		if { [string trim $line] ne "" } {
 		    set R(msg) [new [string toupper [string trim $line]]]
 		    set R(state) HEADER
-		} else {
+		} elseif { $end } {
 		    Debug 4 "Received beat from remote"
 		}
 	    }
@@ -872,7 +872,7 @@ proc ::stomp::message::NewMessage { { factory "" } } {
     # Find the factory we should associate the message to, if any.
     if { $factory ne "" } {
 	if { ![IsA $factory factory] } {	
-    return -code error "$factory is not a known message factory!"
+	    return -code error "$factory is not a known message factory!"
 	}
 	upvar \#0 $factory FCTRY
 	set msg [namespace current]::msg_$FCTRY(id)_[Identifier]

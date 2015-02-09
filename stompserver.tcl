@@ -6,6 +6,10 @@ set prg_args {
     -port     61613       "Port to listen on"
     -users    {}          "List of authorised user and passwords, colon separated"
     -vhosts   {}          "List of virtual hosts"
+    -tls      false       "Encrypt traffic using TLS? (boolean or strict)"
+    -cafile   ""          "Path to CA file, if relevant"
+    -certfile ""          "Path to cert file, if relevant"
+    -keyfile  ""          "Path to key file, if relevant"
 }
 
 
@@ -75,8 +79,26 @@ if { [llength $argv] > 0 } {
 }
 
 ::stomp::verbosity $SRV(-v)
-set SRV(server) [::stomp::server::new \
-		     -port $SRV(-port) \
-		     -users $SRV(-users) \
-		     -vhosts $SRV(-vhosts)]
+if { [string equal -nocase $SRV(-tls) strict] || [string is true $SRV(-tls)] } {
+    package require tls
+    set req [string equal -nocase $SRV(-tls) strict]
+    set SRV(server) [::stomp::server::new \
+			 -port $SRV(-port) \
+			 -users $SRV(-users) \
+			 -vhosts $SRV(-vhosts) \
+			 -socketCmd [list ::tls::socket \
+					 -require $req \
+					 -tls1 1 \
+					 -cafile $SRV(-cafile) \
+					 -certfile $SRV(-certfile) \
+					 -keyfile $SRV(-keyfile) \
+					 -command ::tls::callback]]
+} else {
+    set SRV(server) [::stomp::server::new \
+			 -port $SRV(-port) \
+			 -users $SRV(-users) \
+			 -vhosts $SRV(-vhosts)]
+}
+
+
 vwait forever

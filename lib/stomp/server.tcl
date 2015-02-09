@@ -30,6 +30,7 @@ namespace eval ::stomp::server {
 	    -heartbeat-out 100
 	    -users         "admin:password"
 	    -forgiveness   1.5
+	    -socketCmd     {socket}
 	    types          {server client vhost destination subscription}
 	    notAUser       "-=-=-=-=----=-=-=-=-"
 	    serverName     "TclSTOMP/%version%"
@@ -983,12 +984,14 @@ proc ::stomp::server::Accept { s sock addr port } {
 #       -forgiveness   Forgiveness when disconnecting clients because of
 #                      missed heartbeat (will factor up handshaked
 #                      heartbeat).
+#       -socketCmd     Command to use to establish socket listening connections
 #
 # Arguments:
 #	args	List of dash-led options and arguments, see above.
 #
 # Results:
-#       Return an identifier for the stomp server connection.
+#       Return an identifier for the stomp server connection.  Empty
+#       string on errors.
 #
 # Side Effects:
 #       Will create a basic STOMP server
@@ -1004,10 +1007,27 @@ proc ::stomp::server::new { { args {}} } {
 	GetOpt args $opt SRV($opt) $STOMP($opt)
     }
 
+    # Decide upon socket command to use, we understand the empty
+    # string as the plain and regular socket!
+    if { $SRV(-socketCmd) eq "" } {
+	set sockCmd [list socket]
+    } else {
+	set sockCmd $SRV(-socketCmd)
+    }
+
+    # Start listening to incoming socket connection. Take into account
+    # externally provided socket commands, so we can listen using TLS
+    # for example.
     set SRV(id) $id
-    set SRV(sock) [socket -server \
-		       [list [namespace current]::Accept $s] \
-		       $SRV(-port)]
+    if { [catch {eval [linsert $sockCmd end -server \
+			   [list [namespace current]::Accept $s] \
+			   $SRV(-port)]} sock] } {
+	Debug 1 "Could not listen for incoming connections on port\
+                 $SRV(-port): $sock"
+	unset SRV
+	return ""
+    }
+    set SRV(sock) $sock
 
     # Create virtual hosts, make sure we have a default one, i.e. one
     # listening on default field, usually localhost.

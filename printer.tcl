@@ -9,6 +9,10 @@ set prg_args {
     -password ""         "Password to authenticate with"
     -topic    ""         "Topic to send messages to"
     -type     ""         "Pattern of messages to accept and output on stdout, empty for all, or, e.g. text/*"
+    -tls      false       "Encrypt traffic using TLS?"
+    -cafile   ""          "Path to CA file, if relevant"
+    -certfile ""          "Path to cert file, if relevant"
+    -keyfile  ""          "Path to key file, if relevant"
 }
 
 
@@ -93,12 +97,37 @@ proc ::init { msg } {
     ::stomp::client::subscribe $PRT(client) $PRT(-topic) -handler ::incoming
 }
 
+proc ::tlssocket { args } {
+    global PRT
+
+    if { [catch {eval [linsert $args 0 ::tls::socket \
+			   -tls1 1 \
+			   -cafile $PRT(-cafile) \
+			   -certfile $PRT(-certfile) \
+			   -keyfile $PRT(-keyfile)]} sock] == 0 } {
+	fconfigure $sock -blocking 1 -encoding binary
+	::tls::handshake $sock
+	return $sock
+    }
+    return -code error $sock
+}
+
 ::stomp::verbosity $PRT(-v)
-set PRT(client) [::stomp::client::connect \
-		     -host $PRT(-host) \
-		     -port $PRT(-port) \
-		     -user $PRT(-user) \
-		     -password $PRT(-password)]
+if { [string is true $PRT(-tls)] } {
+    package require tls
+    set PRT(client) [::stomp::client::connect \
+			 -host $PRT(-host) \
+			 -port $PRT(-port) \
+			 -user $PRT(-user) \
+			 -password $PRT(-password) \
+			 -socketCmd ::tlssocket]
+} else {
+    set PRT(client) [::stomp::client::connect \
+			 -host $PRT(-host) \
+			 -port $PRT(-port) \
+			 -user $PRT(-user) \
+			 -password $PRT(-password)]
+}
 ::stomp::client::handler $PRT(client) ::init CONNECTED
 
 vwait forever

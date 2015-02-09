@@ -18,6 +18,7 @@ namespace eval ::stomp::client {
 	    -forgiveness   1.5
 	    -reconnect     1000
 	    -liveness      ""
+	    -socketCmd     {socket}
 	    receiptHeader  "receipt"
 	    types          {client subscription}
 	}
@@ -553,9 +554,11 @@ proc ::stomp::client::Connect { client } {
 	[namespace current]::message::delete $CLT(factory)
 	set CLT(factory) ""
     }
+    set sockCmd $CLT(-socketCmd)
+    if { $sockCmd eq "" } { set sockCmd [list socket] }
     set CLT(sock) ""
     set CLT(reconnect) ""
-    if { [catch {socket $CLT(-host) $CLT(-port)} sock] \
+    if { [catch {eval [linsert $sockCmd end $CLT(-host) $CLT(-port)]} sock] \
 	     && $CLT(reconnect) eq ""} {
 	Debug 2 "Cannot connect to $CLT(-host):$CLT(-port)\
                  retrying in $CLT(-reconnect) ms."
@@ -567,6 +570,7 @@ proc ::stomp::client::Connect { client } {
     }
     fconfigure $CLT(sock) \
 	-blocking 0 \
+	-buffering full \
 	-translation {auto lf} \
 	-encoding utf-8
 

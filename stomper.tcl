@@ -8,6 +8,10 @@ set prg_args {
     -user     ""          "Username to authenticate with"
     -password ""          "Password to authenticate with"
     -topic    ""          "Topic to send messages to"
+    -tls      false       "Encrypt traffic using TLS?"
+    -cafile   ""          "Path to CA file, if relevant"
+    -certfile ""          "Path to cert file, if relevant"
+    -keyfile  ""          "Path to key file, if relevant"
 }
 
 
@@ -99,12 +103,37 @@ proc ::init { msg } {
     fileevent stdin readable ::forward
 }
 
+proc ::tlssocket { args } {
+    global FWD
+
+    if { [catch {eval [linsert $args 0 ::tls::socket \
+			   -tls1 1 \
+			   -cafile $FWD(-cafile) \
+			   -certfile $FWD(-certfile) \
+			   -keyfile $FWD(-keyfile)]} sock] == 0 } {
+	fconfigure $sock -blocking 1 -encoding binary
+	::tls::handshake $sock
+	return $sock
+    }
+    return -code error $sock
+}
+
 ::stomp::verbosity $FWD(-v)
-set FWD(client) [::stomp::client::connect \
-		     -host $FWD(-host) \
-		     -port $FWD(-port) \
-		     -user $FWD(-user) \
-		     -password $FWD(-password)]
+if { [string is true $FWD(-tls)] } {
+    package require tls
+    set FWD(client) [::stomp::client::connect \
+			 -host $FWD(-host) \
+			 -port $FWD(-port) \
+			 -user $FWD(-user) \
+			 -password $FWD(-password) \
+			 -socketCmd ::tlssocket]
+} else {
+    set FWD(client) [::stomp::client::connect \
+			 -host $FWD(-host) \
+			 -port $FWD(-port) \
+			 -user $FWD(-user) \
+			 -password $FWD(-password)]
+}
 ::stomp::client::handler $FWD(client) ::init CONNECTED
 
 vwait forever
