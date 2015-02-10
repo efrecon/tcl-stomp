@@ -12,5 +12,6 @@ RUN apt-get install -y subversion
 RUN svn checkout https://github.com/efrecon/tcl-stomp/trunk /opt/stomp
 
 EXPOSE 61613
+VOLUME /data
 
 ENTRYPOINT ["tclsh8.6", "/opt/stomp/stompserver.tcl"]
