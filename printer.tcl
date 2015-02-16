@@ -112,7 +112,7 @@ proc ::tlssocket { args } {
     return -code error $sock
 }
 
-::stomp::verbosity $PRT(-v)
+::stomp::verbosity $PRT(-verbose)
 if { [string is true $PRT(-tls)] } {
     package require tls
     set PRT(client) [::stomp::client::connect \

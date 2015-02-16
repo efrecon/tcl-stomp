@@ -78,7 +78,7 @@ if { [llength $argv] > 0 } {
     ::help:dump "$argv are unknown arguments!"
 }
 
-::stomp::verbosity $SRV(-v)
+::stomp::verbosity $SRV(-verbose)
 if { [string equal -nocase $SRV(-tls) strict] || [string is true $SRV(-tls)] } {
     package require tls
     set req [string equal -nocase $SRV(-tls) strict]

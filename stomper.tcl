@@ -118,7 +118,7 @@ proc ::tlssocket { args } {
     return -code error $sock
 }
 
-::stomp::verbosity $FWD(-v)
+::stomp::verbosity $FWD(-verbose)
 if { [string is true $FWD(-tls)] } {
     package require tls
     set FWD(client) [::stomp::client::connect \
