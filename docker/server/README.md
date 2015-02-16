@@ -8,10 +8,10 @@ To build:
 
 To run with high verbosity:
 
-    docker run -it --rm -p 61613:61613 efrecon/stomp -v 5
+    docker run -it --rm -p 61613:61613 efrecon/stomp -verbose 5
 
 The server has simple support for the following features.  To bring up
-the full list of options, call it with `-h`:
+the full list of options, call it with `-?`:
 
 * Authentication of users through the `-users` option, which should
   contain a list of colon separated user names and password,
