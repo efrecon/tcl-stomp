@@ -1,7 +1,7 @@
 #! /usr/bin/env tclsh
 
 set prg_args {
-    -?        ""          "Print this help and exit"
+    -help     ""          "Print this help and exit"
     -verbose  0           "Verbosity level \[0-5\]"
     -port     61613       "Port to listen on"
     -users    {}          "List of authorised user and passwords, colon separated"
@@ -63,7 +63,7 @@ foreach {arg val dsc} $prg_args {
     set SRV($arg) $val
 }
 
-if { [::getopt argv "-\\?"] } {
+if { [::getopt argv "-help"] } {
     ::help:dump
 }
 for {set eaten ""} { $eaten ne $argv } {} {
