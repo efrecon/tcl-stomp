@@ -1,8 +1,8 @@
 #! /usr/bin/env tclsh
 
 set prg_args {
-    -h        ""          "Print this help and exit"
-    -v        0           "Verbosity level \[0-5\]"
+    -?        ""          "Print this help and exit"
+    -verbose  0           "Verbosity level \[0-5\]"
     -port     61613       "Port to send to"
     -host     localhost   "Hostname of remote server"
     -user     ""          "Username to authenticate with"
@@ -65,7 +65,7 @@ foreach {arg val dsc} $prg_args {
     set FWD($arg) $val
 }
 
-if { [::getopt argv -h] } {
+if { [::getopt argv "-\\?"] } {
     ::help:dump
 }
 
