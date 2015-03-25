@@ -5,7 +5,7 @@ set prg_args {
     -verbose  0           "Verbosity level \[0-5\]"
     -port     61613       "Port to listen on"
     -users    {}          "List of authorised user and passwords, colon separated"
-    -vhosts   {}          "List of virtual hosts"
+    -vhosts   {*}         "List of virtual hosts"
     -tls      false       "Encrypt traffic using TLS? (boolean or strict)"
     -cafile   ""          "Path to CA file, if relevant"
     -certfile ""          "Path to cert file, if relevant"
