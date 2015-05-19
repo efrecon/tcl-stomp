@@ -1,15 +1,12 @@
-FROM efrecon/tcl
+FROM efrecon/mini-tcl
 MAINTAINER Emmanuel Frecon <emmanuel@sics.se>
 
-# Set the env variable DEBIAN_FRONTEND to noninteractive to get
-# apt-get working without error output.
-ENV DEBIAN_FRONTEND noninteractive
+RUN apk add --update-cache git
 
-
-RUN apt-get update
-RUN apt-get install -y subversion
-
-RUN svn checkout https://github.com/efrecon/tcl-stomp/trunk /opt/stomp
+WORKDIR /tmp
+RUN git clone https://github.com/efrecon/tcl-stomp
+RUN mv /tmp/tcl-stomp /opt/stomp
+RUN rm -rf /var/cache/apk/*
 
 EXPOSE 61613
 VOLUME /data
