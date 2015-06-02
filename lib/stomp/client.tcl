@@ -19,6 +19,7 @@ namespace eval ::stomp::client {
 	    -reconnect     1000
 	    -liveness      ""
 	    -socketCmd     {socket}
+	    -removal       100
 	    receiptHeader  "receipt"
 	    types          {client subscription}
 	}
@@ -493,7 +494,7 @@ proc ::stomp::client::Dispatch { client msg } {
 		    [info vars [namespace current]::subscription_$CLT(id)_*]
 		foreach subscription $allsubs {
 		    upvar \#0 $subscription SUB
-		    if { $SUB(-identifier) eq $sub } {
+		    if { $SUB(-identifier) eq $sub && $SUB(active) } {
 			HandleMessage $subscription $msg
 			break;   # Done, we can only have one...
 		    }
@@ -848,6 +849,7 @@ proc ::stomp::client::subscribe { client dest {args {}}} {
 	    set SUB(-destination) $dest;    # Destination STOMP queue
 	    set SUB(-handler) $handlerCmd;  # Command to call on msg arrival
 	    set SUB(-ack) $ack;             # Message reception ACK mode
+	    set SUB(active) 1;              # Is subscription active?
 	} elseif { $subId eq "" } {
 	    # Generate an identifier for the subscription. Make sure
 	    # this isn't the same as for the subscriptions that we
@@ -891,6 +893,16 @@ proc ::stomp::client::subscribe { client dest {args {}}} {
 }
 
 
+proc ::stomp::client::RemoveSub { sub } {
+    variable STOMP
+
+    if { ![IsA $sub subscription] } {
+	return -code error "$sub is not a known subscription"
+    }
+    unset $sub
+}
+
+
 proc ::stomp::client::unsubscribe { sub } {
     variable STOMP
 
@@ -906,7 +918,14 @@ proc ::stomp::client::unsubscribe { sub } {
 	[namespace parent]::message::setHeader $msg id $SUB(-identifier)
 	Send $SUB(client) $msg
     }
-    unset $sub
+
+    # Inactivate subscription and schedule its removal shortly.
+    set SUB(active) 0
+    if { $CLT(-removal) >= 0 } {
+	after $CLT(-removal) [list [namespace current]::RemoveSub $sub]
+    } else {
+	after idle [list [namespace current]::RemoveSub $sub]
+    }
 }
 
 
@@ -921,7 +940,7 @@ proc ::stomp::client::subscriptions { client { filter "*" } } {
     set subscriptions {}
     foreach s [info vars [namespace current]::subscription_$CLT(id)_*] {
 	upvar \#0 $s SUB
-	if { [string match $filter $SUB(-destination)] } {
+	if { [string match $filter $SUB(-destination)] && $SUB(active) } {
 	    lappend subscriptions $s
 	}
     }
