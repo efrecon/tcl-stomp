@@ -29,7 +29,7 @@ namespace eval ::stomp::server {
 	    -heartbeat-in  10000
 	    -heartbeat-out 100
 	    -users         "admin:password"
-	    -forgiveness   3.5
+	    -forgiveness   1.5
 	    -socketCmd     {socket}
 	    types          {server client vhost destination subscription}
 	    notAUser       "-=-=-=-=----=-=-=-=-"
